@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMART PET</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+    <h1>SMART PET</h1>
+      <p class="subtitle">
+        Alimentación inteligente para mascotas
+    </p>
+</header>
+
+<div class="card hero">
+
+    <div class="status">
+        🟢 Dispositivo conectado
+    </div>
+
+    <img
+        class="pet-image"
+        src="mascotas.jpg"
+        alt="Mascotas">
+
+    <h2 class="hero-title">
+        Tu mascota está esperando su comida
+    </h2>
+
+    <p class="hero-text">
+        Alimenta a tu mascota desde cualquier lugar
+    </p>
+
+    <div id="lastFeed">
+        Aún no hay alimentaciones registradas
+    </div>
+
+    <button id="feedBtn">
+        Alimentar Mascota
+    </button>
+
+    <div id="msg"></div>
+
+</div>
+
+<div class="card">
+    <h2>Actividad de alimentación</h2>
+
+    <div class="stats">
+        <div>
+            <span id="todayCount">0</span>
+            <small>Hoy</small>
+        </div>
+
+        <div>
+            <span id="weekCount">0</span>
+            <small>Semana</small>
+        </div>
+    </div>
+
+    <h3>Actividad semanal</h3>
+
+    <p class="activity-text">
+Visualiza cuántas veces fue alimentada tu mascota durante la semana.
+</p>
+
+    <div id="weekly">
+        <div>Lun <span id="lun"></span></div>
+        <div>Mar <span id="mar"></span></div>
+        <div>Mié <span id="mie"></span></div>
+        <div>Jue <span id="jue"></span></div>
+        <div>Vie <span id="vie"></span></div>
+        <div>Sáb <span id="sab"></span></div>
+        <div>Dom <span id="dom"></span></div>
+    </div>
+
+</div>
+
+<div class="card">
+    <h2>Historial</h2>
+    <div id="historyList">
+        <p>No hay registros todavía.</p>
+    </div>
+</div>
+
+<script type="module" src="app.js"></script>
+
+</body>
+</html>
