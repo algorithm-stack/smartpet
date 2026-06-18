@@ -20,53 +20,53 @@ document.getElementById("weekCount").textContent = 0;
 const days = ['dom','lun','mar','mie','jue','vie','sab'];
 
 function addDot(dayId){
- document.getElementById(dayId).innerHTML +=
- '<span class="dot">●</span> ';
+  document.getElementById(dayId).innerHTML +=
+  '<span class="dot">●</span> ';
 }
 
 document.getElementById('feedBtn').addEventListener('click', async ()=>{
 
- document.getElementById('msg').innerHTML =
- '⏳ Dispensando alimento...';
-
- setTimeout(async ()=>{
-
-  const now = new Date();
-
-  const fecha = now.toLocaleDateString('es-PE',{
-    weekday:'long',
-    year:'numeric',
-    month:'long',
-    day:'numeric'
-  });
-
-  const hora = now.toLocaleTimeString('es-PE');
-
-  await addDoc(
-    collection(db, "alimentaciones"),
-    {
-      fecha: fecha,
-      hora: hora,
-      timestamp: Date.now()
-    }
-  );
-
-  await updateDoc(
-    doc(db, "control", "dispensador"),
-    {
-      alimentar: true
-    }
-  );
-
-  document.getElementById('lastFeed').innerHTML =
-  'Última alimentación: ' + hora;
-
   document.getElementById('msg').innerHTML =
-  '✅ Mascota alimentada';
+  '⏳ Dispensando alimento...';
 
-  cargarHistorialFirebase();
+  setTimeout(async ()=>{
 
- },2000);
+    const now = new Date();
+
+    const fecha = now.toLocaleDateString('es-PE',{
+      weekday:'long',
+      year:'numeric',
+      month:'long',
+      day:'numeric'
+    });
+
+    const hora = now.toLocaleTimeString('es-PE');
+
+    await addDoc(
+      collection(db, "alimentaciones"),
+      {
+        fecha: fecha,
+        hora: hora,
+        timestamp: Date.now()
+      }
+    );
+
+    await updateDoc(
+      doc(db, "control", "dispensador"),
+      {
+        alimentar: true
+      }
+    );
+
+    document.getElementById('lastFeed').innerHTML =
+    'Última alimentación: ' + hora;
+
+    document.getElementById('msg').innerHTML =
+    '✅ Mascota alimentada';
+
+    cargarHistorialFirebase();
+
+  },2000);
 
 });
 
@@ -88,6 +88,17 @@ async function cargarHistorialFirebase(){
   document.getElementById("sab").innerHTML = "";
   document.getElementById("dom").innerHTML = "";
 
+  const ahora = new Date();
+
+  const inicioHoy = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    ahora.getDate()
+  ).getTime();
+
+  const inicioSemana =
+    inicioHoy - (6 * 24 * 60 * 60 * 1000);
+
   const q = query(
     collection(db,"alimentaciones"),
     orderBy("timestamp","desc")
@@ -99,8 +110,13 @@ async function cargarHistorialFirebase(){
 
     const data = docFirebase.data();
 
-    today++;
-    week++;
+    if(data.timestamp >= inicioHoy){
+      today++;
+    }
+
+    if(data.timestamp >= inicioSemana){
+      week++;
+    }
 
     const item =
     document.createElement("div");
