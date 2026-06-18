@@ -1,15 +1,21 @@
 #include <WiFi.h>
+#include <FirebaseESP32.h>
 
-const char* ssid = "A16 de Marysol";
-const char* password = "123.321ks";
+#define WIFI_SSID "A16 de Marysol"
+#define WIFI_PASSWORD "123.321ks"
+
+#define FIREBASE_HOST "smartpet-unife-default-rtdb.firebaseio.com"
+#define FIREBASE_AUTH ""
+
+FirebaseData firebaseData;
 
 void setup() {
 
   Serial.begin(115200);
 
-  WiFi.begin(ssid, password);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  Serial.print("Conectando");
+  Serial.print("Conectando WiFi");
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -20,9 +26,34 @@ void setup() {
   Serial.println("WiFi conectado");
   Serial.println(WiFi.localIP());
 
-  Serial.println("ESP32 listo para Firebase");
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+  Firebase.reconnectWiFi(true);
+
+  Serial.println("Firebase iniciado");
 }
 
 void loop() {
 
+  if (Firebase.getBool(firebaseData, "/alimentar")) {
+
+    bool alimentar = firebaseData.boolData();
+
+    if (alimentar == true) {
+
+      Serial.println("================================");
+      Serial.println("ORDEN DE ALIMENTACION RECIBIDA");
+      Serial.println("================================");
+
+      Firebase.setBool(firebaseData, "/alimentar", false);
+
+      Serial.println("Estado cambiado a FALSE");
+    }
+  }
+  else {
+
+    Serial.print("Error Firebase: ");
+    Serial.println(firebaseData.errorReason());
+  }
+
+  delay(1000);
 }
