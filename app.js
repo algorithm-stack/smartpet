@@ -20,8 +20,8 @@ if(savedHistory){
     ).innerHTML = savedHistory;
 }
 
-let today=0;
-let week=0;
+let today = 0;
+let week = 0;
 
 // Recuperar datos guardados
 
@@ -31,66 +31,77 @@ week = parseInt(localStorage.getItem("week")) || 0;
 document.getElementById("todayCount").textContent = today;
 document.getElementById("weekCount").textContent = week;
 
-const days=['dom','lun','mar','mie','jue','vie','sab'];
+const days = ['dom','lun','mar','mie','jue','vie','sab'];
 
 function addDot(dayId){
  document.getElementById(dayId).innerHTML += '<span class="dot">●</span> ';
 }
 
- document.getElementById('feedBtn').addEventListener('click', async ()=>{
- document.getElementById('msg').innerHTML='⏳ Dispensando alimento...';
+document.getElementById('feedBtn').addEventListener('click', async ()=>{
 
-setTimeout(async ()=>{
+ document.getElementById('msg').innerHTML =
+ '⏳ Dispensando alimento...';
+
+ setTimeout(async ()=>{
 
   today++;
   week++;
 
-localStorage.setItem("today", today);
-localStorage.setItem("week", week);
+  localStorage.setItem("today", today);
+  localStorage.setItem("week", week);
 
-  document.getElementById('todayCount').textContent=today;
-  document.getElementById('weekCount').textContent=week;
+  document.getElementById('todayCount').textContent = today;
+  document.getElementById('weekCount').textContent = week;
 
-  const now=new Date();
+  const now = new Date();
 
-  const fecha=now.toLocaleDateString('es-PE',{
+  const fecha = now.toLocaleDateString('es-PE',{
     weekday:'long',
     year:'numeric',
     month:'long',
     day:'numeric'
   });
 
-  const hora=now.toLocaleTimeString('es-PE');
+  const hora = now.toLocaleTimeString('es-PE');
+
+  // Guardar historial en Firestore
+
+  await addDoc(
+    collection(db, "alimentaciones"),
+    {
+      fecha: fecha,
+      hora: hora,
+      timestamp: Date.now()
+    }
+  );
+
+  // Señal para ESP32
 
   await updateDoc(
-  doc(db, "control", "dispensador"),
-  {
-    alimentar: true
-  }
-);
+    doc(db, "control", "dispensador"),
+    {
+      alimentar: true
+    }
+  );
 
-await updateDoc(
-  doc(db, "control", "dispensador"),
-  {
-    alimentar: true
-  }
-);
+  document.getElementById('lastFeed').innerHTML =
+  'Última alimentación: ' + hora;
 
-  document.getElementById('lastFeed').innerHTML='Última alimentación: '+hora;
+  const item = document.createElement('div');
 
-  const item=document.createElement('div');
-  item.className='event';
+  item.className = 'event';
 
-  item.innerHTML=`
+  item.innerHTML = `
   📅 ${fecha}<br>
   🍽️ Alimentación realizada<br>
   🕒 ${hora}
   `;
 
-  const history=document.getElementById('historyList');
+  const history =
+  document.getElementById('historyList');
 
   if(history.innerHTML.includes('No hay registros')){
-    history.innerHTML='';
+    history.innerHTML = '';
   }
 
   history.prepend(item);
@@ -98,11 +109,12 @@ await updateDoc(
   localStorage.setItem(
     "history",
     history.innerHTML
-);
+  );
 
   addDot(days[now.getDay()]);
 
-  document.getElementById('msg').innerHTML='✅ Mascota alimentada';
+  document.getElementById('msg').innerHTML =
+  '✅ Mascota alimentada';
 
  },2000);
 
@@ -115,6 +127,16 @@ async function cargarHistorialFirebase(){
 
   historial.innerHTML = "";
 
+  // Limpiar actividad semanal
+
+  document.getElementById("lun").innerHTML = "";
+  document.getElementById("mar").innerHTML = "";
+  document.getElementById("mie").innerHTML = "";
+  document.getElementById("jue").innerHTML = "";
+  document.getElementById("vie").innerHTML = "";
+  document.getElementById("sab").innerHTML = "";
+  document.getElementById("dom").innerHTML = "";
+
   const q = query(
     collection(db,"alimentaciones"),
     orderBy("timestamp","desc")
@@ -122,9 +144,9 @@ async function cargarHistorialFirebase(){
 
   const snapshot = await getDocs(q);
 
-  snapshot.forEach((doc)=>{
+  snapshot.forEach((docFirebase)=>{
 
-    const data = doc.data();
+    const data = docFirebase.data();
 
     const item =
     document.createElement("div");
@@ -138,6 +160,39 @@ async function cargarHistorialFirebase(){
     `;
 
     historial.appendChild(item);
+
+    // Reconstruir actividad semanal
+
+    const fechaTexto =
+    data.fecha.toLowerCase();
+
+    if(fechaTexto.includes("lunes")){
+      addDot("lun");
+    }
+    else if(fechaTexto.includes("martes")){
+      addDot("mar");
+    }
+    else if(
+      fechaTexto.includes("miércoles") ||
+      fechaTexto.includes("miercoles")
+    ){
+      addDot("mie");
+    }
+    else if(fechaTexto.includes("jueves")){
+      addDot("jue");
+    }
+    else if(fechaTexto.includes("viernes")){
+      addDot("vie");
+    }
+    else if(
+      fechaTexto.includes("sábado") ||
+      fechaTexto.includes("sabado")
+    ){
+      addDot("sab");
+    }
+    else if(fechaTexto.includes("domingo")){
+      addDot("dom");
+    }
 
   });
 
