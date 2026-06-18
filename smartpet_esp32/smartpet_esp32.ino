@@ -4,6 +4,7 @@ const char* ssid = "A16 de Marysol";
 const char* password = "123.321ks";
 
 void setup() {
+
   Serial.begin(115200);
 
   WiFi.begin(ssid, password);
@@ -18,6 +19,8 @@ void setup() {
   Serial.println("");
   Serial.println("WiFi conectado");
   Serial.println(WiFi.localIP());
+
+  Serial.println("ESP32 listo para Firebase");
 }
 
 void loop() {
