@@ -11,30 +11,17 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-const savedHistory =
-localStorage.getItem("history");
-
-if(savedHistory){
-    document.getElementById(
-        "historyList"
-    ).innerHTML = savedHistory;
-}
-
 let today = 0;
 let week = 0;
 
-// Recuperar datos guardados
-
-today = parseInt(localStorage.getItem("today")) || 0;
-week = parseInt(localStorage.getItem("week")) || 0;
-
-document.getElementById("todayCount").textContent = today;
-document.getElementById("weekCount").textContent = week;
+document.getElementById("todayCount").textContent = 0;
+document.getElementById("weekCount").textContent = 0;
 
 const days = ['dom','lun','mar','mie','jue','vie','sab'];
 
 function addDot(dayId){
- document.getElementById(dayId).innerHTML += '<span class="dot">●</span> ';
+ document.getElementById(dayId).innerHTML +=
+ '<span class="dot">●</span> ';
 }
 
 document.getElementById('feedBtn').addEventListener('click', async ()=>{
@@ -43,15 +30,6 @@ document.getElementById('feedBtn').addEventListener('click', async ()=>{
  '⏳ Dispensando alimento...';
 
  setTimeout(async ()=>{
-
-  today++;
-  week++;
-
-  localStorage.setItem("today", today);
-  localStorage.setItem("week", week);
-
-  document.getElementById('todayCount').textContent = today;
-  document.getElementById('weekCount').textContent = week;
 
   const now = new Date();
 
@@ -64,8 +42,6 @@ document.getElementById('feedBtn').addEventListener('click', async ()=>{
 
   const hora = now.toLocaleTimeString('es-PE');
 
-  // Guardar historial en Firestore
-
   await addDoc(
     collection(db, "alimentaciones"),
     {
@@ -74,8 +50,6 @@ document.getElementById('feedBtn').addEventListener('click', async ()=>{
       timestamp: Date.now()
     }
   );
-
-  // Señal para ESP32
 
   await updateDoc(
     doc(db, "control", "dispensador"),
@@ -87,34 +61,10 @@ document.getElementById('feedBtn').addEventListener('click', async ()=>{
   document.getElementById('lastFeed').innerHTML =
   'Última alimentación: ' + hora;
 
-  const item = document.createElement('div');
-
-  item.className = 'event';
-
-  item.innerHTML = `
-  📅 ${fecha}<br>
-  🍽️ Alimentación realizada<br>
-  🕒 ${hora}
-  `;
-
-  const history =
-  document.getElementById('historyList');
-
-  if(history.innerHTML.includes('No hay registros')){
-    history.innerHTML = '';
-  }
-
-  history.prepend(item);
-
-  localStorage.setItem(
-    "history",
-    history.innerHTML
-  );
-
-  addDot(days[now.getDay()]);
-
   document.getElementById('msg').innerHTML =
   '✅ Mascota alimentada';
+
+  cargarHistorialFirebase();
 
  },2000);
 
@@ -122,12 +72,13 @@ document.getElementById('feedBtn').addEventListener('click', async ()=>{
 
 async function cargarHistorialFirebase(){
 
+  today = 0;
+  week = 0;
+
   const historial =
   document.getElementById("historyList");
 
   historial.innerHTML = "";
-
-  // Limpiar actividad semanal
 
   document.getElementById("lun").innerHTML = "";
   document.getElementById("mar").innerHTML = "";
@@ -148,6 +99,9 @@ async function cargarHistorialFirebase(){
 
     const data = docFirebase.data();
 
+    today++;
+    week++;
+
     const item =
     document.createElement("div");
 
@@ -160,8 +114,6 @@ async function cargarHistorialFirebase(){
     `;
 
     historial.appendChild(item);
-
-    // Reconstruir actividad semanal
 
     const fechaTexto =
     data.fecha.toLowerCase();
@@ -195,6 +147,12 @@ async function cargarHistorialFirebase(){
     }
 
   });
+
+  document.getElementById("todayCount").textContent =
+  today;
+
+  document.getElementById("weekCount").textContent =
+  week;
 
 }
 
