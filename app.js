@@ -62,12 +62,10 @@ localStorage.setItem("week", week);
 
   const hora=now.toLocaleTimeString('es-PE');
 
-  await addDoc(
-  collection(db, "alimentaciones"),
+  await updateDoc(
+  doc(db, "control", "dispensador"),
   {
-    fecha: fecha,
-    hora: hora,
-    timestamp: Date.now()
+    alimentar: true
   }
 );
 
