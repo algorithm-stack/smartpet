@@ -7,7 +7,7 @@
 
 // Firebase
 #define API_KEY "AIzaSyBAHdPcQ_WTVmnHFHbA680VTS92UH1wYmk"
-#define DATABASE_URL "https://smartpet-unife-default-rtdb.firebaseio.com"
+#define DATABASE_URL "https://smartpet-unife-default-rtdb.firebaseio.com/"
 
 FirebaseData fbdo;
 FirebaseAuth auth;
