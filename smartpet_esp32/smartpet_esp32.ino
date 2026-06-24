@@ -17,6 +17,7 @@ void setup() {
 
   Serial.begin(115200);
 
+  // WiFi
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   Serial.print("Conectando WiFi");
@@ -28,14 +29,12 @@ void setup() {
 
   Serial.println();
   Serial.println("WiFi conectado");
+  Serial.print("IP: ");
   Serial.println(WiFi.localIP());
 
+  // Firebase
   config.api_key = API_KEY;
   config.database_url = DATABASE_URL;
-
-  // Sin autenticación de usuario
-  auth.user.email = "";
-  auth.user.password = "";
 
   Firebase.begin(&config, &auth);
   Firebase.reconnectWiFi(true);
@@ -49,15 +48,21 @@ void loop() {
 
     bool alimentar = fbdo.boolData();
 
+    Serial.print("Valor alimentar: ");
+    Serial.println(alimentar);
+
     if (alimentar) {
 
       Serial.println("================================");
       Serial.println("ORDEN DE ALIMENTACION RECIBIDA");
       Serial.println("================================");
 
-      Firebase.RTDB.setBool(&fbdo, "/alimentar", false);
-
-      Serial.println("Estado cambiado a FALSE");
+      if (Firebase.RTDB.setBool(&fbdo, "/alimentar", false)) {
+        Serial.println("Estado cambiado a FALSE");
+      } else {
+        Serial.print("Error al actualizar: ");
+        Serial.println(fbdo.errorReason());
+      }
     }
 
   } else {
